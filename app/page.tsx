@@ -132,77 +132,8 @@ export default function Home() {
       <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-transparent to-primary-100/30" />
       
       {/* Header */}
-      <header className="relative z-10 pt-8 pb-4">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-8"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex-1">
-                <h1 className="text-4xl md:text-5xl font-serif font-bold gradient-text mb-2">
-                  Projeto de Vida Personalizado
-                </h1>
-                <p className="text-gray-600 text-lg">
-                  Transforme suas visões em metas concretas com o poder da IA
-                </p>
-              </div>
-              <div className="ml-8">
-                <AuthButton />
-              </div>
-            </div>
-            
-            {isAuthenticated && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="bg-green-50 border border-green-200 rounded-lg p-3 text-green-700 text-sm"
-              >
-                ✅ Seus dados são salvos automaticamente na nuvem!
-              </motion.div>
-            )}
-          </motion.div>
-
-          {/* Progress Bar */}
-          <div className="mt-12 mb-8">
-            <div className="flex justify-between items-center mb-4">
-              {steps.map((step, index) => {
-                const Icon = step.icon
-                return (
-                  <div key={index} className="flex flex-col items-center">
-                    <motion.div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
-                        index <= currentStep
-                          ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-lg'
-                          : 'bg-gray-200 text-gray-400'
-                      }`}
-                      whileHover={index <= currentStep ? { scale: 1.1 } : {}}
-                    >
-                      <Icon size={20} />
-                    </motion.div>
-                    <span className={`text-sm font-medium ${
-                      index <= currentStep ? 'text-primary-600' : 'text-gray-400'
-                    }`}>
-                      {step.title}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <motion.div
-                className="bg-gradient-to-r from-primary-500 to-secondary-500 h-2 rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
-                transition={{ duration: 0.5 }}
-              />
-            </div>
-          </div>
-        </div>
-      </header>
-
+      <Header />
+      
       {/* Main Content */}
       <main className="relative z-10 pb-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -260,5 +191,20 @@ export default function Home() {
         <p>Produzido por @SkinerBold, inspirado pela Aninha</p>
       </footer>
     </div>
+  )
+}
+
+export default function Header() {
+  return (
+    <header className="bg-white/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-200/80">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <h1 className="text-xl md:text-2xl font-serif font-bold gradient-text">
+            Projeto de Vida
+          </h1>
+          <AuthButton />
+        </div>
+      </div>
+    </header>
   )
 }
