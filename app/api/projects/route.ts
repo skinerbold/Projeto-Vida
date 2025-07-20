@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '../auth/[...nextauth]/route'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '../../../lib/auth'
 import { prisma } from '../../../lib/prisma'
 
 export async function GET() {
@@ -65,25 +65,22 @@ export async function POST(request: NextRequest) {
       emotional: visionData.emotional,
       spiritual: visionData.spiritual,
       character: visionData.character,
-      generatedGoals: generatedGoals ? JSON.stringify(generatedGoals) : null,
+      generatedGoals: generatedGoals ? JSON.stringify(generatedGoals) : '{}',
       currentStep: currentStep || 0,
       completed: completed || false,
     }
 
-    // Verificar se já existe um projeto para este usuário
     const existingProject = await prisma.lifeProject.findFirst({
       where: { userId: session.user.id }
     })
 
     let project
     if (existingProject) {
-      // Atualizar projeto existente
       project = await prisma.lifeProject.update({
         where: { id: existingProject.id },
         data: projectData
       })
     } else {
-      // Criar novo projeto
       project = await prisma.lifeProject.create({
         data: projectData
       })
