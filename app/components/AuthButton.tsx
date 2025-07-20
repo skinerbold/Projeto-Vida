@@ -4,7 +4,7 @@ import { signIn, signOut, useSession } from 'next-auth/react'
 import { motion } from 'framer-motion'
 import { LogIn, LogOut, User } from 'lucide-react'
 
-function AuthButton() {
+export default function AuthButton() {
   const { data: session, status } = useSession()
 
   if (status === 'loading') {
