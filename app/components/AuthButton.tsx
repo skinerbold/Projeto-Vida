@@ -55,7 +55,7 @@ export default function AuthButton() {
     <motion.button
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      onClick={() => signIn('google')}
+      onClick={() => signIn('google', { callbackUrl: '/' })}
       className="btn-primary py-2 px-4 text-sm flex items-center space-x-2"
     >
       <LogIn className="w-4 h-4" />
