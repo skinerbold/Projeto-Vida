@@ -2,41 +2,19 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronRight, Sparkles, Target, User, Heart, Brain, Users, Compass, Shield, Award } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { User, Compass, Target, Award } from 'lucide-react'
+
+import { useProjectData } from '../hooks/useProjectData'
+import { VisionData, GeneratedGoals } from '../lib/types'
+
 import WelcomeStep from './components/WelcomeStep'
 import VisionStep from './components/VisionStep'
 import GoalsGeneration from './components/GoalsGeneration'
 import ReportStep from './components/ReportStep'
 import LoadingAnimation from './components/LoadingAnimation'
-import AuthButton from './components/AuthButton'
-import { useProjectData } from './hooks/useProjectData'
+import Header from './components/Header'
 
-export type VisionData = {
-  name: string
-  physical: string
-  mental: string
-  social: string
-  emotional: string
-  spiritual: string
-  character: string
-}
-
-export type GoalDetail = {
-  goal: string
-  actions: string[]
-  timeline: string
-  resources: string[]
-}
-
-export type GeneratedGoals = {
-  physical: GoalDetail[]
-  mental: GoalDetail[]
-  social: GoalDetail[]
-  emotional: GoalDetail[]
-  spiritual: GoalDetail[]
-  character: GoalDetail[]
-}
 
 export default function Home() {
   const { data: session } = useSession()
@@ -191,20 +169,5 @@ export default function Home() {
         <p>Produzido por @SkinerBold, inspirado pela Aninha</p>
       </footer>
     </div>
-  )
-}
-
-export default function Header() {
-  return (
-    <header className="bg-white/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-200/80">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <h1 className="text-xl md:text-2xl font-serif font-bold gradient-text">
-            Projeto de Vida
-          </h1>
-          <AuthButton />
-        </div>
-      </div>
-    </header>
   )
 }

@@ -23,7 +23,6 @@ export default function AuthButton() {
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center space-x-4"
       >
-        {/* Informações do Usuário */}
         <div className="flex items-center space-x-2">
           {session.user?.image ? (
             <img 
@@ -41,7 +40,6 @@ export default function AuthButton() {
           </span>
         </div>
         
-        {/* Botão Sair */}
         <button
           onClick={() => signOut()}
           className="btn-secondary p-2 rounded-full hover:bg-red-50 hover:text-red-600 transition-colors"
