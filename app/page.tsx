@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronRight, Sparkles, Target, User, Heart, Brain, Users, Compass, Shield, Award } from 'lucide-react'
 import WelcomeStep from './components/WelcomeStep'
@@ -8,6 +9,8 @@ import VisionStep from './components/VisionStep'
 import GoalsGeneration from './components/GoalsGeneration'
 import ReportStep from './components/ReportStep'
 import LoadingAnimation from './components/LoadingAnimation'
+import AuthButton from './components/AuthButton'
+import { useProjectData } from './hooks/useProjectData'
 
 export type VisionData = {
   name: string
@@ -36,6 +39,9 @@ export type GeneratedGoals = {
 }
 
 export default function Home() {
+  const { data: session } = useSession()
+  const { projectData, saveProject, isAuthenticated } = useProjectData()
+  
   const [currentStep, setCurrentStep] = useState(0)
   const [visionData, setVisionData] = useState<VisionData>({
     name: '',
@@ -49,25 +55,56 @@ export default function Home() {
   const [generatedGoals, setGeneratedGoals] = useState<GeneratedGoals | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  // Auto-save no localStorage
+  // Carregar dados do projeto quando disponível
   useEffect(() => {
-    const savedData = localStorage.getItem('projeto-de-vida-data')
-    if (savedData) {
-      const parsed = JSON.parse(savedData)
-      setVisionData(parsed.visionData || visionData)
-      setGeneratedGoals(parsed.generatedGoals || null)
-      setCurrentStep(parsed.currentStep || 0)
+    if (projectData) {
+      setVisionData(projectData.visionData)
+      setGeneratedGoals(projectData.generatedGoals)
+      setCurrentStep(projectData.currentStep)
     }
-  }, [])
+  }, [projectData])
+
+  // Auto-save quando os dados mudarem (para usuários autenticados)
+  useEffect(() => {
+    if (isAuthenticated && (visionData.name || generatedGoals)) {
+      const autoSave = async () => {
+        await saveProject({
+          visionData,
+          generatedGoals,
+          currentStep,
+          completed: currentStep === 3
+        })
+      }
+      
+      // Debounce auto-save
+      const timeoutId = setTimeout(autoSave, 1000)
+      return () => clearTimeout(timeoutId)
+    }
+  }, [visionData, generatedGoals, currentStep, isAuthenticated, saveProject])
+
+  // Fallback para localStorage se não estiver autenticado
+  useEffect(() => {
+    if (!isAuthenticated) {
+      const savedData = localStorage.getItem('projeto-de-vida-data')
+      if (savedData) {
+        const parsed = JSON.parse(savedData)
+        setVisionData(parsed.visionData || visionData)
+        setGeneratedGoals(parsed.generatedGoals || null)
+        setCurrentStep(parsed.currentStep || 0)
+      }
+    }
+  }, [isAuthenticated])
 
   useEffect(() => {
-    const dataToSave = {
-      visionData,
-      generatedGoals,
-      currentStep
+    if (!isAuthenticated) {
+      const dataToSave = {
+        visionData,
+        generatedGoals,
+        currentStep
+      }
+      localStorage.setItem('projeto-de-vida-data', JSON.stringify(dataToSave))
     }
-    localStorage.setItem('projeto-de-vida-data', JSON.stringify(dataToSave))
-  }, [visionData, generatedGoals, currentStep])
+  }, [visionData, generatedGoals, currentStep, isAuthenticated])
 
   const steps = [
     { title: 'Bem-vindo', icon: User },
@@ -100,14 +137,32 @@ export default function Home() {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center"
+            className="text-center mb-8"
           >
-            <h1 className="text-4xl md:text-5xl font-serif font-bold gradient-text mb-2">
-              Projeto de Vida Personalizado
-            </h1>
-            <p className="text-gray-600 text-lg">
-              Transforme suas visões em metas concretas com o poder da IA
-            </p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex-1">
+                <h1 className="text-4xl md:text-5xl font-serif font-bold gradient-text mb-2">
+                  Projeto de Vida Personalizado
+                </h1>
+                <p className="text-gray-600 text-lg">
+                  Transforme suas visões em metas concretas com o poder da IA
+                </p>
+              </div>
+              <div className="ml-8">
+                <AuthButton />
+              </div>
+            </div>
+            
+            {isAuthenticated && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-green-50 border border-green-200 rounded-lg p-3 text-green-700 text-sm"
+              >
+                ✅ Seus dados são salvos automaticamente na nuvem!
+              </motion.div>
+            )}
           </motion.div>
 
           {/* Progress Bar */}

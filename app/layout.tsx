@@ -1,5 +1,6 @@
 import './globals.css'
 import ServiceWorkerRegistration from './components/ServiceWorkerRegistration'
+import AuthProvider from './components/AuthProvider'
 
 export const metadata = {
   title: 'Projeto de Vida Personalizado',
@@ -34,8 +35,10 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans">
-        <ServiceWorkerRegistration />
-        {children}
+        <AuthProvider>
+          <ServiceWorkerRegistration />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   )

@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Sparkles, RefreshCw, ChevronLeft, AlertCircle } from 'lucide-react'
-import { VisionData, GeneratedGoals } from '../page'
+import { Sparkles, RefreshCw, ChevronLeft, AlertCircle, Target, Clock, Package, CheckCircle } from 'lucide-react'
+import { VisionData, GeneratedGoals, GoalDetail } from '../page'
 import { generateGoals } from '../lib/gemini'
 
 interface GoalsGenerationProps {
@@ -50,11 +50,11 @@ export default function GoalsGeneration({
   }
 
   // Auto-generate goals on first load
-  useState(() => {
+  useEffect(() => {
     if (!generatedGoals && !error) {
       handleGenerateGoals()
     }
-  })
+  }, [])
 
   if (error) {
     return (
@@ -136,36 +136,84 @@ export default function GoalsGeneration({
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="space-y-8 mb-8">
           {categories.map((category, index) => (
             <motion.div
               key={category.key}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * index }}
-              className="space-y-3"
+              className="space-y-4"
             >
-              <div className="flex items-center font-medium text-gray-700 mb-3">
-                <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${category.color} flex items-center justify-center mr-3`}>
+              <div className="flex items-center font-semibold text-lg text-gray-800 mb-4">
+                <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${category.color} flex items-center justify-center mr-3`}>
                   <span className="text-white text-sm font-bold">
                     {category.title.charAt(0)}
                   </span>
                 </div>
-                {category.title}
+                {category.title} - Plano de 5 Anos
               </div>
-              <div className="space-y-2">
-                {generatedGoals[category.key as keyof GeneratedGoals]?.map((goal: string, goalIndex: number) => (
+              
+              <div className="grid gap-4">
+                {generatedGoals[category.key as keyof GeneratedGoals]?.map((goalDetail: GoalDetail, goalIndex: number) => (
                   <motion.div
                     key={goalIndex}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.2 + (goalIndex * 0.1) }}
-                    className="bg-gray-50 p-3 rounded-lg border border-gray-100 text-sm"
+                    className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
                   >
-                    <span className="font-medium text-primary-600">
-                      Ano {goalIndex + 1}:
-                    </span>{' '}
-                    {goal}
+                    <div className="mb-4">
+                      <h4 className="font-semibold text-primary-600 text-lg mb-2 flex items-center">
+                        <Target className="w-5 h-5 mr-2" />
+                        Ano {goalIndex + 1}: {goalDetail.goal}
+                      </h4>
+                    </div>
+                    
+                    <div className="grid md:grid-cols-3 gap-4">
+                      {/* Ações */}
+                      <div className="space-y-2">
+                        <h5 className="font-medium text-gray-700 flex items-center text-sm">
+                          <CheckCircle className="w-4 h-4 mr-1 text-green-600" />
+                          Ações Necessárias
+                        </h5>
+                        <ul className="space-y-1">
+                          {goalDetail.actions.map((action: string, actionIndex: number) => (
+                            <li key={actionIndex} className="text-sm text-gray-600 flex items-start">
+                              <span className="w-2 h-2 bg-primary-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                              {action}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      
+                      {/* Cronograma */}
+                      <div className="space-y-2">
+                        <h5 className="font-medium text-gray-700 flex items-center text-sm">
+                          <Clock className="w-4 h-4 mr-1 text-blue-600" />
+                          Cronograma
+                        </h5>
+                        <p className="text-sm text-gray-600 bg-blue-50 p-2 rounded-lg">
+                          {goalDetail.timeline}
+                        </p>
+                      </div>
+                      
+                      {/* Recursos */}
+                      <div className="space-y-2">
+                        <h5 className="font-medium text-gray-700 flex items-center text-sm">
+                          <Package className="w-4 h-4 mr-1 text-orange-600" />
+                          Recursos Necessários
+                        </h5>
+                        <ul className="space-y-1">
+                          {goalDetail.resources.map((resource: string, resourceIndex: number) => (
+                            <li key={resourceIndex} className="text-sm text-gray-600 flex items-start">
+                              <span className="w-2 h-2 bg-orange-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                              {resource}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
                   </motion.div>
                 ))}
               </div>

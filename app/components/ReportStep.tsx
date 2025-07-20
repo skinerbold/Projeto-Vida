@@ -1,8 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Download, Share2, ChevronLeft, Calendar, Target } from 'lucide-react'
-import { VisionData, GeneratedGoals } from '../page'
+import { Download, Share2, ChevronLeft, Calendar, Target, CheckCircle, Clock, Package } from 'lucide-react'
+import { VisionData, GeneratedGoals, GoalDetail } from '../page'
 
 interface ReportStepProps {
   visionData: VisionData
@@ -80,17 +80,48 @@ export default function ReportStep({ visionData, generatedGoals, onPrev }: Repor
         </div>
 
         <div class="section">
-            <h2>📅 Plano de Metas Anuais</h2>
-            <div class="goals">
-                ${Object.entries(generatedGoals || {}).map(([category, goals]) => `
-                    <div class="goal-card">
-                        <h3 style="color: #d35d3a; margin-top: 0;">${getCategoryTitle(category)}</h3>
-                        ${goals.map((goal: string, index: number) => `
-                            <p><span class="year">Ano ${index + 1}:</span> ${goal}</p>
-                        `).join('')}
-                    </div>
-                `).join('')}
-            </div>
+            <h2>📅 Plano Detalhado de Metas</h2>
+            ${Object.entries(generatedGoals || {}).map(([category, goals]) => `
+                <div class="category-section">
+                    <h3 style="color: #d35d3a; margin-bottom: 20px;">${getCategoryTitle(category)}</h3>
+                    ${goals.map((goalDetail: GoalDetail, index: number) => `
+                        <div class="goal-detail" style="margin-bottom: 30px; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <h4 style="color: #c4472f; margin-bottom: 15px; font-size: 1.1em;">
+                                Ano ${index + 1}: ${goalDetail.goal}
+                            </h4>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                                <div>
+                                    <h5 style="color: #16a34a; margin-bottom: 10px; display: flex; align-items: center;">
+                                        ✓ Ações Necessárias
+                                    </h5>
+                                    <ul style="margin: 0; padding-left: 20px;">
+                                        ${goalDetail.actions.map((action: string) => `<li style="margin-bottom: 5px;">${action}</li>`).join('')}
+                                    </ul>
+                                </div>
+                                
+                                <div>
+                                    <h5 style="color: #2563eb; margin-bottom: 10px; display: flex; align-items: center;">
+                                        ⏰ Cronograma
+                                    </h5>
+                                    <p style="background: #eff6ff; padding: 10px; border-radius: 6px; margin: 0;">
+                                        ${goalDetail.timeline}
+                                    </p>
+                                </div>
+                                
+                                <div>
+                                    <h5 style="color: #ea580c; margin-bottom: 10px; display: flex; align-items: center;">
+                                        📦 Recursos Necessários
+                                    </h5>
+                                    <ul style="margin: 0; padding-left: 20px;">
+                                        ${goalDetail.resources.map((resource: string) => `<li style="margin-bottom: 5px;">${resource}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('')}
         </div>
 
         <div class="footer">
@@ -219,18 +250,60 @@ export default function ReportStep({ visionData, generatedGoals, onPrev }: Repor
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 + (index * 0.1) }}
-                className="border-l-4 border-primary-200 pl-4"
+                className="border-l-4 border-primary-200 pl-6"
               >
-                <h4 className="font-medium text-gray-800 mb-3 capitalize">
+                <h4 className="font-medium text-gray-800 mb-4 capitalize text-lg">
                   {getCategoryTitle(category)}
                 </h4>
-                <div className="space-y-2">
-                  {goals.map((goal: string, goalIndex: number) => (
-                    <div key={goalIndex} className="flex items-start">
-                      <span className="inline-block w-16 text-xs font-medium text-primary-600 mt-1 flex-shrink-0">
-                        Ano {goalIndex + 1}:
-                      </span>
-                      <span className="text-sm text-gray-700">{goal}</span>
+                <div className="space-y-4">
+                  {goals.map((goalDetail: GoalDetail, goalIndex: number) => (
+                    <div key={goalIndex} className="bg-gray-50 rounded-lg p-4">
+                      <div className="font-medium text-primary-600 mb-3 flex items-center">
+                        <Target className="w-4 h-4 mr-2" />
+                        Ano {goalIndex + 1}: {goalDetail.goal}
+                      </div>
+                      
+                      <div className="grid md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <h5 className="font-medium text-green-700 mb-2 flex items-center">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Ações
+                          </h5>
+                          <ul className="space-y-1 text-gray-600">
+                            {goalDetail.actions.map((action, actionIndex) => (
+                              <li key={actionIndex} className="flex items-start">
+                                <span className="w-1 h-1 bg-green-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                                {action}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        
+                        <div>
+                          <h5 className="font-medium text-blue-700 mb-2 flex items-center">
+                            <Clock className="w-3 h-3 mr-1" />
+                            Cronograma
+                          </h5>
+                          <p className="text-gray-600 bg-blue-50 p-2 rounded text-xs">
+                            {goalDetail.timeline}
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <h5 className="font-medium text-orange-700 mb-2 flex items-center">
+                            <Package className="w-3 h-3 mr-1" />
+                            Recursos
+                          </h5>
+                          <ul className="space-y-1 text-gray-600">
+                            {goalDetail.resources.map((resource, resourceIndex) => (
+                              <li key={resourceIndex} className="flex items-start">
+                                <span className="w-1 h-1 bg-orange-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                                {resource}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
