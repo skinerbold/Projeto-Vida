@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { User, Sparkles } from 'lucide-react'
-import { VisionData } from '../page'
+import { VisionData } from '../../lib/types'
 
 interface WelcomeStepProps {
   visionData: VisionData

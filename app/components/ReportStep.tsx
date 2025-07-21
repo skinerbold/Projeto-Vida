@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { Download, Share2, ChevronLeft, Calendar, Target, CheckCircle, Clock, Package } from 'lucide-react'
-import { VisionData, GeneratedGoals, GoalDetail } from '../page'
+import { VisionData, GeneratedGoals, GoalDetail } from '../../lib/types'
 
 interface ReportStepProps {
   visionData: VisionData

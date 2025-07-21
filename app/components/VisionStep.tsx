@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { Heart, Brain, Users, Compass, Shield, Award, ChevronLeft } from 'lucide-react'
-import { VisionData } from '../page'
+import { VisionData } from '../../lib/types'
 
 interface VisionStepProps {
   visionData: VisionData

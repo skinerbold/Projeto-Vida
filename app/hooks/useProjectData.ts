@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { VisionData, GeneratedGoals } from '../page'
+import { VisionData, GeneratedGoals } from '../../lib/types'
 
 export interface ProjectData {
   id?: string

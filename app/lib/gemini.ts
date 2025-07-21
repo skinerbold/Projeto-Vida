@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { VisionData, GeneratedGoals, GoalDetail } from '../page'
+import { VisionData, GeneratedGoals, GoalDetail } from '../../lib/types'
 
 const API_KEY = 'AIzaSyDbXpYwyGL3jWFeuYiRb8Hjlji2FpuLvUQ'
 
