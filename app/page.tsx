@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { User, Compass, Target, Award } from 'lucide-react'
 
-import { useProjectData } from '../hooks/useProjectData'
+import { useProjectData } from './hooks/useProjectData'
 import { VisionData, GeneratedGoals } from '../lib/types'
 
 import WelcomeStep from './components/WelcomeStep'
