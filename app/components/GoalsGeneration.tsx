@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Sparkles, RefreshCw, ChevronLeft, AlertCircle, Target, Clock, Package, CheckCircle } from 'lucide-react'
-import { VisionData, GeneratedGoals, GoalDetail } from '../lib/types'
+import { VisionData, GeneratedGoals, GoalDetail } from '../../lib/types'
 import { generateGoals } from '../lib/gemini'
 
 interface GoalsGenerationProps {
