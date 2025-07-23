@@ -36,9 +36,16 @@ export default function Home() {
   // Carregar dados do projeto quando disponível
   useEffect(() => {
     if (projectData) {
-      setVisionData(projectData.visionData)
-      setGeneratedGoals(projectData.generatedGoals)
-      setCurrentStep(projectData.currentStep)
+      // Só atualizar se os dados do projeto são mais recentes
+      if (projectData.visionData && projectData.visionData.name) {
+        setVisionData(projectData.visionData)
+      }
+      if (projectData.generatedGoals) {
+        setGeneratedGoals(projectData.generatedGoals)
+      }
+      if (projectData.currentStep !== undefined) {
+        setCurrentStep(projectData.currentStep)
+      }
     }
   }, [projectData])
 

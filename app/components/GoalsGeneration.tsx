@@ -33,6 +33,14 @@ export default function GoalsGeneration({
       setIsLoading(true)
       if (regenerate) setIsRegenerating(true)
 
+      // Debug log
+      console.log('Gerando metas para:', { 
+        name: visionData.name, 
+        hasPhysical: !!visionData.physical,
+        regenerate,
+        feedback: userFeedback 
+      })
+
       const goals = await generateGoals(visionData, userFeedback)
       setGeneratedGoals(goals)
     } catch (err: any) {
@@ -51,10 +59,11 @@ export default function GoalsGeneration({
 
   // Auto-generate goals on first load
   useEffect(() => {
-    if (!generatedGoals && !error) {
+    // Só gerar metas se não existirem e se tivermos dados válidos
+    if (!generatedGoals && !error && visionData.name && visionData.physical) {
       handleGenerateGoals()
     }
-  }, [])
+  }, [generatedGoals, error, visionData.name, visionData.physical])
 
   if (error) {
     return (

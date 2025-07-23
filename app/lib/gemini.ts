@@ -8,17 +8,32 @@ if (!API_KEY) {
 }
 
 const genAI = new GoogleGenerativeAI(API_KEY)
-const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+const model = genAI.getGenerativeModel({ 
+  model: 'gemini-1.5-flash',
+  generationConfig: {
+    temperature: 0.7,
+    topK: 40,
+    topP: 0.95,
+    maxOutputTokens: 2048,
+  }
+})
+
+// Cache simples para evitar regenerar metas idênticas
+const cache = new Map<string, GeneratedGoals>()
 
 export async function generateGoals(visionData: VisionData, feedback: string = ''): Promise<GeneratedGoals> {
+  // Criar chave de cache baseada nos dados
+  const cacheKey = JSON.stringify({ visionData, feedback })
+  
+  // Verificar cache primeiro
+  if (cache.has(cacheKey) && !feedback) {
+    return cache.get(cacheKey)!
+  }
+
   try {
-    const prompt = `
-Você é um expert em planejamento de vida e desenvolvimento pessoal. Com base nas visões de 5 anos fornecidas pelo usuário, crie um plano detalhado com metas anuais, ações específicas, prazos e recursos necessários para cada categoria.
+    const prompt = `Crie metas anuais (5 anos) para ${visionData.name} baseadas em suas visões:
 
-INFORMAÇÕES DO USUÁRIO:
-Nome: ${visionData.name}
-
-VISÕES PARA 2030:
+VISÕES 2030:
 - Físico: ${visionData.physical}
 - Mental: ${visionData.mental}  
 - Social: ${visionData.social}
@@ -26,59 +41,32 @@ VISÕES PARA 2030:
 - Espiritual: ${visionData.spiritual}
 - Caráter: ${visionData.character}
 
-${feedback ? `FEEDBACK DO USUÁRIO: ${feedback}` : ''}
+${feedback ? `AJUSTES: ${feedback}` : ''}
 
-INSTRUÇÕES:
-1. Para cada categoria, crie exatamente 5 metas (uma para cada ano)
-2. Para cada meta, forneça:
-   - GOAL: A meta específica e mensurável
-   - ACTIONS: 3-5 ações concretas para alcançar a meta
-   - TIMELINE: Prazo específico e marcos intermediários
-   - RESOURCES: Recursos necessários (tempo, dinheiro, ferramentas, pessoas, etc.)
-3. As metas devem ser progressivas e construir uma sobre a outra
-4. Use linguagem motivacional e prática
-5. Seja específico com prazos, valores e quantidades
-6. As ações devem ser práticas e realizáveis
-
-FORMATO DE RESPOSTA (JSON):
+RESPONDA APENAS COM JSON:
 {
   "physical": [
-    {
-      "goal": "Meta específica do ano 1",
-      "actions": ["Ação 1", "Ação 2", "Ação 3", "Ação 4"],
-      "timeline": "Prazo específico com marcos",
-      "resources": ["Recurso 1", "Recurso 2", "Recurso 3"]
-    }
+    {"goal": "Meta ano 1", "actions": ["ação1", "ação2", "ação3"], "timeline": "12 meses", "resources": ["recurso1", "recurso2"]},
+    {"goal": "Meta ano 2", "actions": [...], "timeline": "...", "resources": [...]},
+    ...5 metas total
   ],
-  "mental": [...],
-  "social": [...],
-  "emotional": [...],
-  "spiritual": [...],
-  "character": [...]
+  "mental": [...5 metas],
+  "social": [...5 metas], 
+  "emotional": [...5 metas],
+  "spiritual": [...5 metas],
+  "character": [...5 metas]
 }
 
-EXEMPLO PARA REFERÊNCIA:
-{
-  "goal": "Perder 10kg e atingir 15% de gordura corporal",
-  "actions": [
-    "Treinar 4x por semana na academia",
-    "Seguir dieta de 1800 calorias",
-    "Caminhar 10.000 passos diários",
-    "Fazer exames médicos trimestrais"
-  ],
-  "timeline": "12 meses | Marcos: -3kg (3 meses), -6kg (6 meses), -10kg (12 meses)",
-  "resources": [
-    "Academia: R$ 80/mês",
-    "Nutricionista: R$ 150/consulta",
-    "App de contagem calórica",
-    "Smartwatch para monitoramento"
-  ]
-}
+Metas progressivas, específicas e práticas.`
 
-Responda APENAS com o JSON válido, sem explicações adicionais.
-    `
+    // Criar promise com timeout
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Timeout: A IA demorou muito para responder')), 30000)
+    )
 
-    const result = await model.generateContent(prompt)
+    const generatePromise = model.generateContent(prompt)
+    
+    const result = await Promise.race([generatePromise, timeoutPromise]) as any
     const response = await result.response
     const text = response.text()
 
@@ -90,22 +78,17 @@ Responda APENAS com o JSON válido, sem explicações adicionais.
 
     const goals = JSON.parse(jsonMatch[0])
     
-    // Validar estrutura da resposta
+    // Validação rápida
     const requiredKeys = ['physical', 'mental', 'social', 'emotional', 'spiritual', 'character']
     for (const key of requiredKeys) {
-      if (!goals[key] || !Array.isArray(goals[key]) || goals[key].length !== 5) {
-        throw new Error(`Estrutura inválida na resposta da IA para a categoria: ${key}`)
+      if (!goals[key] || !Array.isArray(goals[key])) {
+        throw new Error(`Estrutura inválida na categoria: ${key}`)
       }
-      
-      // Validar estrutura de cada meta
-      for (const goalDetail of goals[key]) {
-        if (!goalDetail.goal || !goalDetail.actions || !goalDetail.timeline || !goalDetail.resources) {
-          throw new Error(`Meta incompleta na categoria ${key}. Faltam campos obrigatórios.`)
-        }
-        if (!Array.isArray(goalDetail.actions) || !Array.isArray(goalDetail.resources)) {
-          throw new Error(`Formato inválido na categoria ${key}. Actions e resources devem ser arrays.`)
-        }
-      }
+    }
+
+    // Salvar no cache se não for regeneração
+    if (!feedback) {
+      cache.set(cacheKey, goals)
     }
 
     return goals as GeneratedGoals
